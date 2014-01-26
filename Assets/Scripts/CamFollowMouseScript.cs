@@ -7,7 +7,7 @@ public class CamFollowMouseScript : MonoBehaviour {
 	public float minMouseDist = 0.5f;
 	public float cameraRadius = 300;
 	Vector3 attemptedPos;
-	float height = -10;
+	float height = -7;
 	Vector3 truePos;
 	Vector3 targPos;
 	// Use this for initialization
