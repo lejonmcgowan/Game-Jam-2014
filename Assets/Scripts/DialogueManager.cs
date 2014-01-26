@@ -26,6 +26,8 @@ public class DialogueManager : MonoBehaviour {
 
     void Update()
     {
+        
+        
         if (test == true)
         {
             displayDialogue(0, "mom");
@@ -46,8 +48,9 @@ public class DialogueManager : MonoBehaviour {
 
     public void displayDialogue(int dialogueLineNumber, string character)
     {
-       TextMesh display = (TextMesh)GetComponent("TextMesh");
-        
+       GUIText display = (GUIText)GetComponent("GUIText");
+
+       display.fontSize = (Screen.width) / 40;
         if (character == "mom")
         {
             display.text = dialogueMomArray[dialogueLineNumber];
@@ -59,6 +62,9 @@ public class DialogueManager : MonoBehaviour {
         
     }
 
+    void OnMouseDown()
+    {
 
+    }
 
 }
