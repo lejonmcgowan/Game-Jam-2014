@@ -4,14 +4,16 @@ using System.Collections;
 public class FlashLight : MonoBehaviour {
 	public float coneRad;
 	public float spreadAng;
+	public int iter = 3; //# of triangles, must be 3 or >
 	// Use this for initialization
 	private float phi;
 	private Mesh lightMesh;
-	private Vector3[] verts = new Vector3[5];
+
+	private Vector3[] verts;
 	private Vector3 ray1, ray2, ray1Dot, ray2Dot;
-	private int[] tri = new int[9];
-	private Vector2[] uv = new Vector2[5];
-	private Vector3[] norm = new Vector3[5];
+	private int[] tri;
+	private Vector2[] uv;
+	private Vector3[] norm;
 	private Vector3 centerRay;
 	public Light endLight;
 	private bool ray1Hit;
@@ -19,6 +21,24 @@ public class FlashLight : MonoBehaviour {
 	void Start () {
 		//endLight = GameObject.FindGameObjectWithTag ("FlashEnd") as Light;
 		lightMesh = GetComponent<MeshFilter> ().mesh;
+		verts = new Vector3[iter+1];
+		tri = new int[3 * (iter-2)];
+		uv = new Vector2[iter+1];
+		norm = new Vector3[iter+1];
+		
+		uv [0] = new Vector2 (0.5f, 0.5f);
+		int lastTri = 1;
+		for(int i = 0; i < tri.Length; i+=3)
+		{
+			Debug.Log("Building tris ["+i+"]["+(i+1)+"]["+(i+2)+"]");
+			tri[i] = 0;
+			tri[i+1] = lastTri;
+			tri[i+2] = lastTri+1;
+		
+			Debug.Log("Built tris "  + tri[i]  +" "+tri[i+1] + " " + tri[i+2]);
+			lastTri++;
+		}
+
 	}
 	
 	// Update is called once per frame
@@ -31,22 +51,42 @@ public class FlashLight : MonoBehaviour {
 			centerRay = new Vector3(mouseInfo.point.x,mouseInfo.point.y,0);
 			centerRay-=transform.position;
 			centerRay.Normalize ();
-			centerRay *= coneRad;
+			
 		}
-		phi = Mathf.Atan2 (centerRay.y, centerRay.x);
-		ray1 = new Vector3 (coneRad * Mathf.Cos (phi - spreadAng),
-		                            coneRad * Mathf.Sin (phi - spreadAng), 0);
-		ray2 = new Vector3 (coneRad * Mathf.Cos (phi + spreadAng), 
-		                            coneRad * Mathf.Sin (phi + spreadAng), 0);
-	
+		phi = Mathf.Atan2(centerRay.y, centerRay.x);
+		Debug.DrawRay (transform.position, centerRay);
+		float dPhi = Mathf.Abs (spreadAng / iter);
+		float currPhi = phi + spreadAng / 2;
+		for (int i = 1; i < iter; i++) {
+			Vector3 vert = new Vector3(coneRad*Mathf.Cos(currPhi),coneRad*Mathf.Sin(currPhi),0);
 
+			RaycastHit cast;
+			if(Physics.Raycast(this.transform.position,vert,out cast,coneRad))
+			{
+			   vert.Normalize();
+			   vert*=cast.distance;
+			}
+			currPhi-=dPhi;
+			verts[i]=vert;
+		
+			uv[i] =new Vector2(vert.x/2/coneRad + 0.5f,vert.y/2/coneRad + 0.5f);
+			norm[i] = Vector3.back;
+			//Debug.DrawRay(transform.position,vert);
 
+		}
+		lightMesh.vertices = verts;
+		lightMesh.triangles = tri;
+		lightMesh.uv = uv;
+		lightMesh.normals = norm;
+
+		endLight.transform.position = verts [iter / 2] * .8f + transform.position;
+		//endLight.range = (verts[iter/4] + 
+		/*
 		RaycastHit info1;
 		RaycastHit info2;
 		ray1Hit = false;
 		ray2Hit = false;
 		if (Physics.Raycast (transform.position, ray1, out info1, coneRad)) {
-
 			Vector3 crs =Vector3.Cross(info1.normal,Vector3.forward);
 			Vector3 shrt = ray1;
 			shrt.Normalize();
@@ -118,6 +158,7 @@ public class FlashLight : MonoBehaviour {
 		}
 	
 		endLight.range = Vector3.Distance(ray1,ray2)*2;
+		endLight.intensity = 1 / Vector3.Distance (ray1, ray2)/2;
 		Debug.DrawLine(ray1Dot+transform.position,ray2Dot+transform.position);
 		endLight.transform.position = (ray2Dot*.8f-ray1Dot*.8f)/2 + ray1Dot*.8f + transform.position;
 	
@@ -145,14 +186,14 @@ public class FlashLight : MonoBehaviour {
 		lightMesh.vertices = verts;
 		lightMesh.triangles = tri;
 
-		uv [0] = new Vector2 (0, 0.5f);
-		uv [1] = new Vector2 (Mathf.Abs(ray1.x)/coneRad,Mathf.Abs(ray1.y)/coneRad);
-		uv [2] = new Vector2 (Mathf.Abs(ray1Dot.x)/coneRad,Mathf.Abs(ray1Dot.y)/coneRad);
-		uv [3] = new Vector2 (Mathf.Abs(ray2Dot.x)/coneRad,Mathf.Abs(ray2Dot.y)/coneRad);
-		uv [4] = new Vector2 (Mathf.Abs(ray2.x)/coneRad,Mathf.Abs(ray2.y)/coneRad);
+		uv [0] = new Vector2 (0.5f, 0.5f);
+		uv [1] = new Vector2 (ray1.x/coneRad + 0.5f,ray1.y/coneRad+ 0.5f);
+		uv [2] = new Vector2 (ray1Dot.x/coneRad + 0.5f,ray1Dot.y/coneRad + 0.5f);
+		uv [3] = new Vector2 (ray2Dot.x/coneRad + 0.5f,ray2Dot.y/coneRad+ 0.5f);
+		uv [4] = new Vector2 (ray2.x/coneRad + 0.5f,ray2.y/coneRad + 0.5f);
 		lightMesh.normals = norm;
 		lightMesh.uv = uv;
-
+		*/
 
 		/*
 		Debug.DrawLine (verts [0]+transform.position, verts [1]+transform.position);
@@ -162,4 +203,9 @@ public class FlashLight : MonoBehaviour {
 		Debug.DrawLine (verts [4]+transform.position, verts [0]+transform.position);
 		*/
 	}
+	void buildTris(int[] arr)
+	{
+
+	}
+
 }
