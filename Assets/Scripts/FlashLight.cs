@@ -30,12 +30,12 @@ public class FlashLight : MonoBehaviour {
 		int lastTri = 1;
 		for(int i = 0; i < tri.Length; i+=3)
 		{
-			Debug.Log("Building tris ["+i+"]["+(i+1)+"]["+(i+2)+"]");
+			//Debug.Log("Building tris ["+i+"]["+(i+1)+"]["+(i+2)+"]");
 			tri[i] = 0;
 			tri[i+1] = lastTri;
 			tri[i+2] = lastTri+1;
 		
-			Debug.Log("Built tris "  + tri[i]  +" "+tri[i+1] + " " + tri[i+2]);
+			//Debug.Log("Built tris "  + tri[i]  +" "+tri[i+1] + " " + tri[i+2]);
 			lastTri++;
 		}
 
@@ -80,7 +80,7 @@ public class FlashLight : MonoBehaviour {
 		lightMesh.normals = norm;
 
 		endLight.transform.position = verts [iter / 2] * .8f + transform.position;
-		//endLight.range = (verts[iter/4] + 
+		endLight.range = Vector3.Distance (verts [iter / 4], verts [iter / 4 * 3]);
 		/*
 		RaycastHit info1;
 		RaycastHit info2;
