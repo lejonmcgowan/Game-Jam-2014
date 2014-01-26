@@ -63,6 +63,7 @@ public class FlashLight : MonoBehaviour {
 			RaycastHit cast;
 			if(Physics.Raycast(this.transform.position,vert,out cast,coneRad))
 			{
+
 			   vert.Normalize();
 			   vert*=cast.distance;
 			}
@@ -80,7 +81,7 @@ public class FlashLight : MonoBehaviour {
 		lightMesh.normals = norm;
 
 		endLight.transform.position = verts [iter / 2] * .8f + transform.position;
-		endLight.range = Vector3.Distance (verts [iter / 4], verts [iter / 4 * 3]);
+		endLight.range = Vector3.Distance (verts [iter / 4], verts [iter / 4 * 3])*1.5f;
 		/*
 		RaycastHit info1;
 		RaycastHit info2;
